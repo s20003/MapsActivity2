@@ -149,7 +149,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         if (lastKnownLocation != null) {
                             map?.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                 LatLng(lastKnownLocation!!.latitude,
-                                    lastKnownLocation!!.longitude), DEFAULT_BUFFER_SIZE.toFloat()))
+                                    lastKnownLocation!!.longitude), DEFAULT_ZOOM.toFloat()))
                         }
                     } else {
                         Log.d(TAG, "Current location is null. Using defaults.")
