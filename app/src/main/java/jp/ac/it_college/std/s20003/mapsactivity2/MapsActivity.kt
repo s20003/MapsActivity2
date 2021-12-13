@@ -115,10 +115,37 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //mMap = googleMap
         this.map = map
 
-        val toilet = LatLng(26.217528, 127.696939)
+        val toilet1 = LatLng(26.217528, 127.696939)
+        val toilet2 = LatLng(26.2174068, 127.6868302)
+        val toilet3 = LatLng(26.2205469, 127.6910343)
+        val toilet4 = LatLng(26.207594, 127.6924231)
         map.addMarker(
             MarkerOptions()
-                .position(toilet)
+                .position(toilet1)
+                .title("""
+                    Marker in toilet
+                """.trimIndent())
+        )
+
+        map.addMarker(
+            MarkerOptions()
+                .position(toilet2)
+                .title("""
+                    Marker in toilet
+                """.trimIndent())
+        )
+
+        map.addMarker(
+            MarkerOptions()
+                .position(toilet3)
+                .title("""
+                    Marker in toilet
+                """.trimIndent())
+        )
+
+        map.addMarker(
+            MarkerOptions()
+                .position(toilet4)
                 .title("""
                     Marker in toilet
                 """.trimIndent())
