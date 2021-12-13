@@ -2,11 +2,9 @@ package jp.ac.it_college.std.s20003.mapsactivity2
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.location.Location
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -14,10 +12,16 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.*
-import com.google.android.gms.maps.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
@@ -110,6 +114,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(map: GoogleMap) {
         //mMap = googleMap
         this.map = map
+
+        val toilet = LatLng(26.217528, 127.696939)
+        map.addMarker(
+            MarkerOptions()
+                .position(toilet)
+                .title("""
+                    Marker in toilet
+                """.trimIndent())
+        )
 
         this.map?.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
             override fun getInfoWindow(arg0: Marker): View? {
@@ -244,7 +257,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun openPlacesDialog() {
-        val listener = DialogInterface.OnClickListener { dialog, which ->
+        val listener = DialogInterface.OnClickListener { _, which ->
             val markerLatLng = likelyPlaceLatLngs[which]
             var markerSnippet = likelyPlaceAddresses[which]
             if (likelyPlaceAttributions[which] != null) {
