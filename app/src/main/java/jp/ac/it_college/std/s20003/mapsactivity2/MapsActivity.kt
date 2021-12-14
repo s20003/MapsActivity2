@@ -30,6 +30,9 @@ import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import java.io.BufferedReader
+import java.io.InputStreamReader
+
 //import jp.ac.it_college.std.s20003.mapsactivity2.databinding.ActivityMapsBinding
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -115,15 +118,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //mMap = googleMap
         this.map = map
 
-        val toilet1 = LatLng(26.217528, 127.696939)
-        val toilet2 = LatLng(26.2174068, 127.6868302)
-        val toilet3 = LatLng(26.2205469, 127.6910343)
-        val toilet4 = LatLng(26.207594, 127.6924231)
+        val assetManager = resources.assets
+        val inputStream = assetManager.open("data.json")
+        val bufferedReader = BufferedReader(InputStreamReader(inputStream))
+        val str: String = bufferedReader.readText()
+
+        /*
+        val toilet1 = LatLng(26.2174068, 127.6868302) //  緑ヶ丘パラダイス通り公衆トイレ
+        val toilet2 = LatLng(26.2205469, 127.6910343) // 崇元寺公園公衆トイレ
+        val toilet3 = LatLng(26.207594, 127.6924231) // 与儀公園内公衆トイレ
+        val toilet4 = LatLng(26.2148969, 127.6806085) //　美栄橋公園 公衆トイレ
+         */
+
+        /*
         map.addMarker(
             MarkerOptions()
                 .position(toilet1)
                 .title("""
-                    Marker in toilet
+                    緑ヶ丘パラダイス通り 公衆トイレ
                 """.trimIndent())
         )
 
@@ -131,7 +143,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             MarkerOptions()
                 .position(toilet2)
                 .title("""
-                    Marker in toilet
+                    崇元寺公園 公衆トイレ
                 """.trimIndent())
         )
 
@@ -139,7 +151,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             MarkerOptions()
                 .position(toilet3)
                 .title("""
-                    Marker in toilet
+                    与儀公園内 公衆トイレ
                 """.trimIndent())
         )
 
@@ -147,9 +159,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             MarkerOptions()
                 .position(toilet4)
                 .title("""
-                    Marker in toilet
+                    美栄橋公園 公衆トイレ
                 """.trimIndent())
         )
+         */
 
         this.map?.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
             override fun getInfoWindow(arg0: Marker): View? {
