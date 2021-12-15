@@ -30,7 +30,6 @@ import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -119,57 +118,32 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(map: GoogleMap) {
         //mMap = googleMap
         this.map = map
-
+        // Jsonファイル読み込み
         val assetManager = resources.assets
         val inputStream = assetManager.open("data.json")
         val bufferedReader = BufferedReader(InputStreamReader(inputStream))
         val str: String = bufferedReader.readText()
+        // Jsonファイルのセット
+        val rootJson = JSONObject(str)
+        val jsonArray = rootJson.getJSONArray("data")
+        // マーカー表示
+        for (i in 0 until jsonArray.length()) {
+            val data = jsonArray.getJSONObject(i)
+            val parkName = data.getString("park")
+            val address = data.getString("address")
+            val lat = data.getString("latitude")
+            val lon = data.getString("longitude")
+            val toilet = LatLng(lat.toDouble(), lon.toDouble())
 
-        val jsonObject = JSONObject(str)
-        val jsonArray = jsonObject.getJSONArray("data")
-
-
-
-        /*
-        val toilet1 = LatLng(26.2174068, 127.6868302) //  緑ヶ丘パラダイス通り公衆トイレ
-        val toilet2 = LatLng(26.2205469, 127.6910343) // 崇元寺公園公衆トイレ
-        val toilet3 = LatLng(26.207594, 127.6924231) // 与儀公園内公衆トイレ
-        val toilet4 = LatLng(26.2148969, 127.6806085) //　美栄橋公園 公衆トイレ
-         */
-
-        /*
-        map.addMarker(
-            MarkerOptions()
-                .position(toilet1)
-                .title("""
-                    緑ヶ丘パラダイス通り 公衆トイレ
-                """.trimIndent())
-        )
-
-        map.addMarker(
-            MarkerOptions()
-                .position(toilet2)
-                .title("""
-                    崇元寺公園 公衆トイレ
-                """.trimIndent())
-        )
-
-        map.addMarker(
-            MarkerOptions()
-                .position(toilet3)
-                .title("""
-                    与儀公園内 公衆トイレ
-                """.trimIndent())
-        )
-
-        map.addMarker(
-            MarkerOptions()
-                .position(toilet4)
-                .title("""
-                    美栄橋公園 公衆トイレ
-                """.trimIndent())
-        )
-         */
+            map.addMarker(
+                MarkerOptions()
+                    .position(toilet)
+                    .title("""
+                        $parkName
+                        $address
+                    """.trimIndent())
+            )
+        }
 
         this.map?.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
             override fun getInfoWindow(arg0: Marker): View? {
@@ -189,13 +163,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         getLocationPermission()
         updateLocationUI()
         getDeviceLocation()
-
-        // Add a marker in Okinawa and move the camera
-        /*
-        val tokyo = LatLng(26.2123, 127.6791)
-        mMap!!.addMarker(MarkerOptions().position(tokyo).title("Marker in Okinawa"))
-        mMap!!.moveCamera(CameraUpdateFactory.newLatLngZoom(tokyo, 15F))
-         */
     }
 
     @SuppressLint("MissingPermission")
