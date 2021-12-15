@@ -30,6 +30,8 @@ import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -122,6 +124,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val inputStream = assetManager.open("data.json")
         val bufferedReader = BufferedReader(InputStreamReader(inputStream))
         val str: String = bufferedReader.readText()
+
+        val jsonObject = JSONObject(str)
+        val jsonArray = jsonObject.getJSONArray("data")
+
+
 
         /*
         val toilet1 = LatLng(26.2174068, 127.6868302) //  緑ヶ丘パラダイス通り公衆トイレ
