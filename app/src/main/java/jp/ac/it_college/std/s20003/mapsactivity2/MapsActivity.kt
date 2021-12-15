@@ -116,7 +116,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      * installed Google Play services and returned to the app.
      */
     override fun onMapReady(map: GoogleMap) {
-        //mMap = googleMap
         this.map = map
         // Jsonファイル読み込み
         val assetManager = resources.assets
