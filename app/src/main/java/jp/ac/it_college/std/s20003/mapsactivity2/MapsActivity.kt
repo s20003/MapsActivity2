@@ -30,7 +30,7 @@ import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
-import org.json.JSONObject
+import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -121,18 +121,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val assetManager = resources.assets
         val inputStream = assetManager.open("data.json")
         val bufferedReader = BufferedReader(InputStreamReader(inputStream))
-        val str: String = bufferedReader.readText()
+        val dataJson: String = bufferedReader.readText()
         // Jsonファイルのセット
-        val rootJson = JSONObject(str)
-        val jsonArray = rootJson.getJSONArray("data")
+        val rootJson = JSONArray(dataJson)
         // マーカー表示
-        for (i in 0 until jsonArray.length()) {
-            val data = jsonArray.getJSONObject(i)
+        for (i in 0 until rootJson.length()) {
+            val data = rootJson.getJSONObject(i)
             val parkName = data.getString("park")
             val address = data.getString("address")
-            val lat = data.getString("latitude")
-            val lon = data.getString("longitude")
-            val toilet = LatLng(lat.toDouble(), lon.toDouble())
+            val lat = data.getDouble("latitude")
+            val lon = data.getDouble("longitude")
+            val toilet = LatLng(lat, lon)
 
             map.addMarker(
                 MarkerOptions()
