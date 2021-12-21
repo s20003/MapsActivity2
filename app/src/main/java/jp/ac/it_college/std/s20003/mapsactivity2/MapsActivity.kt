@@ -34,14 +34,11 @@ import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-//import jp.ac.it_college.std.s20003.mapsactivity2.databinding.ActivityMapsBinding
-
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var map: GoogleMap? = null
     private var cameraPosition: CameraPosition? = null
 
-    //private lateinit var binding: ActivityMapsBinding
     private lateinit var placesClient: PlacesClient
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
