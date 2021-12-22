@@ -133,10 +133,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             map.addMarker(
                 MarkerOptions()
                     .position(toilet)
-                    .title("""
-                        $parkName
-                        $address
-                    """.trimIndent())
+                    .title(parkName)
+                    .snippet(address)
             )
         }
 
