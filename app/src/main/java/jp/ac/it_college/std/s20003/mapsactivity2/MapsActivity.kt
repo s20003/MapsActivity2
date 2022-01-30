@@ -57,7 +57,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         private const val KEY_LOCATION = "location"
         private const val M_MAX_ENTRIES = 5
     }
-//
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //binding = ActivityMapsBinding.inflate(layoutInflater)
@@ -78,6 +78,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
+
+        // ここから
+        /*
+        fusedLocationProviderClient.lastLocation
+            .addOnSuccessListener { location : Location? ->
+
+            }
+
+         */
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
