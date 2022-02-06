@@ -3,8 +3,12 @@ package jp.ac.it_college.std.s20003.mapsactivity2
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.Point
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -30,6 +34,9 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.util.*
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -79,14 +86,30 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
 
-        // ここから
-        /*
-        fusedLocationProviderClient.lastLocation
-            .addOnSuccessListener { location : Location? ->
+        //test1()
 
-            }
+    }
 
-         */
+    fun test1() {
+        val lat1 = 26.217439
+        val lon1 = 127.686756
+
+        val lat2 = 26.220509
+        val lon2 = 127.690936
+
+        intent = Intent()
+        intent.action = Intent.ACTION_VIEW
+        intent.setClassName("com.google.android.apps.maps",
+            "com.google.android.maps.MapsActivity")
+
+        val str = String.format(
+            Locale.US,
+            "http://maps.google.com/maps?saddr=%s,%s&daddr=%s,%s",
+            lat1, lon1, lat2, lon2
+        )
+
+        intent.data = Uri.parse(str)
+        startActivity(intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -118,6 +141,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
     override fun onMapReady(map: GoogleMap) {
         this.map = map
         // Jsonファイル読み込み
@@ -146,6 +170,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             map.moveCamera(CameraUpdateFactory.newLatLng(toilet))
         }
 
+        //ルート表示
+        map.addPolyline(
+            PolylineOptions()
+                .add(LatLng(26.217439, 127.686756))
+                .add(LatLng(26.220509, 127.690936))
+                .color(Color.RED)
+                .width(8f)
+        )
+
         this.map?.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
             override fun getInfoWindow(arg0: Marker): View? {
                 return null
@@ -165,6 +198,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         updateLocationUI()
         getDeviceLocation()
     }
+
+    //private fun drawRoute()
 
     @SuppressLint("MissingPermission")
     private fun getDeviceLocation() {
