@@ -3,11 +3,9 @@ package jp.ac.it_college.std.s20003.mapsactivity2
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.DialogInterface
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -36,7 +34,6 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.util.*
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.PolyUtil
 import jp.ac.it_college.std.s20003.mapsactivity2.BuildConfig.MAPS_API_KEY
@@ -47,14 +44,14 @@ import java.net.SocketTimeoutException
 import java.net.URL
 import java.util.concurrent.Executors
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private var map: GoogleMap? = null
     private var cameraPosition: CameraPosition? = null
 
     private lateinit var placesClient: PlacesClient
 
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private val defaultLocation = LatLng(-33.8523341, 151.2106085)
     private var locationPermissionGranted = false
@@ -65,7 +62,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var likelyPlaceAttributions: Array<List<*>?> = arrayOfNulls(0)
     private var likelyPlaceLatLngs: Array<LatLng?> = arrayOfNulls(0)
 
-    private var urlHeader = "https://maps.googleapis.com/maps/api/directions/json?"
+
     private var DEBUG_TAG = "Sample"
 
     companion object {
@@ -77,9 +74,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         private const val M_MAX_ENTRIES = 5
     }
 
+    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //binding = ActivityMapsBinding.inflate(layoutInflater)
 
         if (savedInstanceState != null) {
             lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION)
@@ -88,17 +85,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         setContentView(R.layout.activity_maps)
 
-        Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
+        Places.initialize(applicationContext, MAPS_API_KEY)
         placesClient = Places.createClient(this)
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
-
-        //test1()
 
     }
 
@@ -134,10 +129,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     //ここから
     @SuppressLint("PotentialBehaviorOverride")
-    @UiThread
     override fun onMapReady(map: GoogleMap) {
         this.map = map
         // Jsonファイル読み込み
+        onMarkerSet()
+
+        this.map?.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
+            override fun getInfoWindow(arg0: Marker): View? {
+                return null
+            }
+
+            override fun getInfoContents(marker: Marker): View {
+                val infoWindow = layoutInflater.inflate(R.layout.custom_info_contents,
+                    findViewById<FrameLayout>(R.id.map), false)
+                val title = infoWindow.findViewById<TextView>(R.id.title)
+                title.text = marker.title
+                val snippet = infoWindow.findViewById<TextView>(R.id.snippet)
+                snippet.text = marker.snippet
+                return infoWindow
+            }
+        })
+        getLocationPermission()
+        updateLocationUI()
+        getDeviceLocation()
+    }
+
+    @SuppressLint("PotentialBehaviorOverride")
+    private fun onMarkerSet() {
         val assetManager = resources.assets
         val inputStream = assetManager.open("data.json")
         val bufferedReader = BufferedReader(InputStreamReader(inputStream))
@@ -153,22 +171,44 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val lon = data.getDouble("longitude")
             val toilet = LatLng(lat, lon)
 
-            map.addMarker(
+            map?.addMarker(
                 MarkerOptions()
                     .position(toilet)
                     .title(parkName)
                     .snippet(address)
                     .icon(BitmapDescriptorFactory.fromResource(R.mipmap.toilet))
             )
-            map.moveCamera(CameraUpdateFactory.newLatLng(toilet))
+            map?.moveCamera(CameraUpdateFactory.newLatLng(toilet))
+        }
+        map?.setOnMarkerClickListener(this)
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onMarkerClick(marker: Marker): Boolean {
+        // ルートの削除
+        if (PolylineOptions().isVisible) {
+            map?.addPolyline(PolylineOptions())?.remove()
         }
 
+        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            location?.let {
+                val start = "${it.latitude},${it.longitude}"
+                val dest = "${marker.position.latitude},${marker.position.longitude}"
+                getRoutes(start, dest)
+            }
+        }
+        return false
+    }
+
+    @UiThread
+    private fun getRoutes(start: String, dest: String) {
         val handler = HandlerCompat.createAsync(mainLooper)
         val executeService = Executors.newSingleThreadExecutor()
 
         executeService.submit @WorkerThread {
-            val origin = "origin=" + "26.210738,127.6859172" + "&"
-            val destination = "destination=" + "26.217439,127.686756" + "&"
+            val urlHeader = "https://maps.googleapis.com/maps/api/directions/json?"
+            val origin = "origin=$start&"
+            val destination = "destination=$dest&"
             val key = "key=$MAPS_API_KEY"
             val url = URL(urlHeader + origin + destination + key)
             val con = url.openConnection() as? HttpURLConnection
@@ -194,45 +234,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val getArray = routes.getJSONObject(0)
                 val overviewPolyline = getArray.getJSONObject("overview_polyline")
                 val points = overviewPolyline.getString("points")
-                //println(points)
                 val p = PolyUtil.decode(points)
 
-                // ここにループ処理を書く
-                for (i in p) {
-                    println(i)
-                }// 失敗
-
-                map.addPolyline(
+                map?.addPolyline(
                     PolylineOptions()
                         .clickable(true)
                         .color(Color.RED)
                         .width(9f)
-                        .add(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
-                        p[9], p[10], p[11], p[12], p[13], p[14], p[15], p[16],
-                        p[17], p[18], p[19], p[20], p[21], p[22])
+                        .addAll(p)
                 )
-            }
 
+            }
         }
-
-        this.map?.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
-            override fun getInfoWindow(arg0: Marker): View? {
-                return null
-            }
-
-            override fun getInfoContents(marker: Marker): View {
-                val infoWindow = layoutInflater.inflate(R.layout.custom_info_contents,
-                    findViewById<FrameLayout>(R.id.map), false)
-                val title = infoWindow.findViewById<TextView>(R.id.title)
-                title.text = marker.title
-                val snippet = infoWindow.findViewById<TextView>(R.id.snippet)
-                snippet.text = marker.snippet
-                return infoWindow
-            }
-        })
-        getLocationPermission()
-        updateLocationUI()
-        getDeviceLocation()
     }
 
     private fun is2String(stream: InputStream?): String {
@@ -244,7 +257,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun getDeviceLocation() {
         try {
             if (locationPermissionGranted) {
-                val locationResult = fusedLocationProviderClient.lastLocation
+                val locationResult = fusedLocationClient.lastLocation
                 locationResult.addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
                         lastKnownLocation = task.result
