@@ -63,7 +63,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     private var likelyPlaceLatLngs: Array<LatLng?> = arrayOfNulls(0)
 
     private var mapLine: Polyline? = null
-    private val DEBUG_TAG = "Sample"
+    private val debugTag = "Sample"
 
     companion object {
         private val TAG = MapsActivity::class.java.simpleName
@@ -222,7 +222,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                     result = is2String(stream)
                     stream.close()
                 } catch (e: SocketTimeoutException) {
-                    Log.w(DEBUG_TAG, "通信タイムアウト", e)
+                    Log.w(debugTag, "通信タイムアウト", e)
                 }
                 it.disconnect()
             }
