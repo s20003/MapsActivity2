@@ -62,8 +62,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     private var likelyPlaceAttributions: Array<List<*>?> = arrayOfNulls(0)
     private var likelyPlaceLatLngs: Array<LatLng?> = arrayOfNulls(0)
 
-
-    private var DEBUG_TAG = "Sample"
+    private var mapLine: Polyline? = null
+    private val DEBUG_TAG = "Sample"
 
     companion object {
         private val TAG = MapsActivity::class.java.simpleName
@@ -186,9 +186,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     @SuppressLint("MissingPermission")
     override fun onMarkerClick(marker: Marker): Boolean {
         // ルートの削除
-        if (PolylineOptions().isVisible) {
-            map?.addPolyline(PolylineOptions())?.remove()
-        }
+        mapLine?.isVisible = false
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
             location?.let {
@@ -236,7 +234,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                 val points = overviewPolyline.getString("points")
                 val p = PolyUtil.decode(points)
 
-                map?.addPolyline(
+                if (map?.addPolyline(PolylineOptions())!!.isVisible) {
+                    map?.addPolyline(PolylineOptions())!!.isVisible = false
+                }
+
+                mapLine = map?.addPolyline(
                     PolylineOptions()
                         .clickable(true)
                         .color(Color.RED)
