@@ -149,6 +149,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                 return infoWindow
             }
         })
+        map.setOnMapClickListener {
+            mapLine?.isVisible = false
+        }
         getLocationPermission()
         updateLocationUI()
         getDeviceLocation()
